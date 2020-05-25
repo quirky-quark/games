@@ -1,0 +1,132 @@
+---
+title: "descriptive statistics"
+author: "Marina Zaigraeva"
+date: "10 05 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(stringr)
+library(dplyr)
+library(ggplot2)
+games <- read_csv("~/data.csv")
+```
+
+```{r}
+length(unique(games$platform)) #19 platforms
+library(factoextra)
+library(knitr)
+library(kableExtra)
+
+pltf = games %>% group_by(platform) %>% summarize(n = n()) %>% arrange(desc(n)) %>% top_n(10, n)
+
+kable(pltf, col.names = c("Gaming Platform","Number of Games")) %>% 
+  kable_styling("striped", full_width = F, position="left") %>% 
+   add_header_above(c("Top 10 gaming platforms by the number of games" =1 , " " = 1), bold = T, italic = T)
+```
+```{r}
+p <- read_csv2("~/p.csv")
+all = p %>% group_by(platform) %>% summarize(n = n()) %>% arrange(desc(n)) %>% top_n(4,n)
+
+kable(all, col.names = c("Platform Family","Number of Games")) %>% 
+  kable_styling("striped", full_width = F, position="left") %>% 
+   add_header_above(c("The most common platform families by the number of games" =1 , " " = 1), bold = T, italic = T)
+```
+
+#Scores 
+
+```{r}
+ggplot()+ geom_histogram(data = games, aes(x = crit_score), fill = "#f7f5ad",binwidth = 1) + theme_classic()
+ggplot()+ geom_histogram(data = games, aes(x = user_score), fill = "#bcb3da",binwidth = 0.1) + theme_classic()
+
+summary(games$user_score)
+summary(games$crit_score)
+
+shapiro.test(games$crit_score)
+qqnorm(games$crit_score)
+
+shapiro.test(games$user_score)
+qqnorm(games$user_score)
+
+ggplot() + geom_point(data = games, aes(user_score, crit_score), color = "#c1dbda") + 
+  geom_smooth(data = games, aes(x = user_score, y = crit_score)) + theme_classic()
+
+cor.test(games$user_score, games$crit_score, method = "spearman") #cor=47
+
+u = games %>% group_by(id) %>% summarize(user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T)) %>% arrange(desc(user_rating)) %>% top_n(10, user_rating)
+
+c = games %>% group_by(id) %>% summarize(crit_rating = median(crit_score, na.rm = T), user_rating = median(user_score, na.rm = T)) %>% arrange(desc(crit_rating)) %>% top_n(15, crit_rating)
+
+difs = games %>% mutate(dif = abs(crit_score/10-user_score)) %>% select(id, user_score, crit_score, dif) %>% top_n(40, dif)
+
+kable(u, col.names = c("Game","User Score","Metascore")) %>% 
+  kable_styling("striped", full_width = F, position="left") %>% 
+   add_header_above(c("Games with highest user scores" =1 , " " = 2), bold = T, italic = T)
+
+kable(c, col.names = c("Game","Metascore","User Score")) %>% 
+  kable_styling("striped", full_width = F, position="left") %>% 
+   add_header_above(c("Games with highest critic scores" =1 , " " = 2), bold = T, italic = T)
+```
+
+#Genres 
+
+```{r}
+action = games %>% filter(action==1, sp==1, mp==1) %>% summarize(n = n(), dev = median(n_devs), sin = median(sp_median), mul = mean(mp_median), user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T))
+
+shooter = games %>% filter(shooter==1, sp==1, mp==1) %>% summarize(n = n(), dev = median(n_devs), sin = median(sp_median), mul = mean(mp_median), user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T))
+
+adventure = games %>% filter(adventure==1, sp==1, mp==1) %>% summarize(n = n(), dev = median(n_devs), sin = median(sp_median), mul = mean(mp_median), user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T))
+
+rpg = games %>% filter(rpg==1, sp==1, mp==1) %>% summarize(n = n(), dev = median(n_devs), sin = median(sp_median), mul = mean(mp_median), user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T))
+
+strategy = games %>% filter(strategy==1, sp==1, mp==1) %>% summarize(n = n(), dev = median(n_devs), sin = median(sp_median), mul = mean(mp_median), user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T))
+
+simulation = games %>% filter(sumulation==1, sp==1, mp==1) %>% summarize(n = n(), dev = median(n_devs), sin = median(sp_median), mul = mean(mp_median), user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T))
+
+sports = games %>% filter(sports==1, sp==1, mp==1) %>% summarize(n = n(), dev = median(n_devs), sin = median(sp_median), mul = mean(mp_median), user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T))
+
+vehicle = games %>% filter(vehicle==1, sp==1, mp==1) %>% summarize(n = n(), dev = median(n_devs), sin = median(sp_median), mul = mean(mp_median), user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T))
+
+tr = games %>% filter(trivia==1, sp==1, mp==1) %>% summarize(n = n(), dev = median(n_devs), sin = median(sp_median), mul = mean(mp_median), user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T))
+pu = games %>% filter(puzzle==1, sp==1, mp==1) %>% summarize(n = n(), dev = median(n_devs), sin = median(sp_median), mul = mean(mp_median), user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T))
+```
+
+
+#Publishers
+
+```{r}
+length(unique(games$publisher)) #25 publishers
+
+pubs = games %>% group_by(publisher) %>% summarize(n=n(), dev = round(median(n_devs)), oi = (median(op))/1000000, sus = (median(sust))/1000000, stock_var = mean(stock_var), user_rating = median(user_score, na.rm = T), crit_rating = median(crit_score, na.rm = T)) %>% arrange(desc(n)) %>% top_n(10, n)
+
+games = games %>% mutate(weighted_uc_score = 0.5*user_score+0.5*(crit_score/10))
+g = games %>% mutate(weighted_uc_score = 0.5*user_score+0.5*(crit_score/10)) %>% group_by(publisher) %>% summarize(n = n(), mucs = median(weighted_uc_score))
+```
+
+```{r}
+games %>% 
+  filter(!is.na(weighted_uc_score)) %>% 
+  ggplot(aes(weighted_uc_score, group = publisher)) +
+  geom_density(aes(fill = publisher), alpha = .4) +
+  xlim(0, 10) +
+  theme_bw() + facet_wrap(~publisher) + theme(legend.position = "none", panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+```{r}
+sp=games %>% group_by(sp) %>% summarise(n=n())
+mp=games %>% group_by(mp) %>% summarise(n=n())
+
+q=data.frame('sp'=c(36,2924),'mp'=c(1229,1731))
+
+ggplot(data=q)+geom_col(aes(x='sp',y=sp, fill=as.factor(sp)), show.legend = F)+geom_col(aes(x='mp',y=mp,fill=as.factor(sp)), show.legend = F) + theme_classic() + xlab("Game Mode") +
+  ylab("Number of Games") + scale_fill_brewer(palette = "Pastel1")
+```
+
+
+
+
